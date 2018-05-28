@@ -9,6 +9,7 @@
  */
 package client_project.UserInformation;
 
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,7 +17,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.binary.Hex;
 /**
  *
  * @author 101580150
@@ -36,8 +38,11 @@ public class NetControl extends Thread  {
     private static String Ip_w;
     private static String fromServer;
     private static String username;
-    private static String password;        
+    private static String password;    
+    private static DigestUtils Digest;    
     private String ACK = "ACK";
+    private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
+
 
     @Override
     public void destroy() {
@@ -100,11 +105,14 @@ public class NetControl extends Thread  {
     private void setUpConnection()
     {
         while(!AUTHENTICATED && SETTINGCONNECTION){
-            try{                                                               
+            try{   
+                int Timeout = 0;
+                if (Timeout >= 15) ToggleFlag("SETTINGCONNECTION");
                 System.out.println("*** Setting up Connection please wait");            
                 sendMessage("NETWORKSTART"); // Send Start Message                   
-                fromServer = FromServer.readLine().replaceAll("//s", "");                 
+                fromServer = FromServer.readLine().replaceAll("//s", "");   
                 if (fromServer.equals(ACK)) SendCredentials(); // If message is sent back, send credentuals                 
+                Timeout++;
             }catch(IOException e){}
         }
     }
@@ -117,7 +125,7 @@ public class NetControl extends Thread  {
              if (fromServer.equals(ACK)) 
              {
                  System.out.println("*** Network Connection: Name Accepted, Password being sent...");
-                 sendMessage(password);                          
+                 sendMessage(MySQLPassword(password));                          
                  fromServer = FromServer.readLine().replaceAll("//s", "");                  
                  if (fromServer.equals(ACK))
                  {
@@ -225,13 +233,36 @@ public class NetControl extends Thread  {
         fromServer = null;
         osToServer.flush(); 
         osToServer.println(Message);        
-    }    
+    }   
      
+
     private void PrintToggledFlag(String InputBool, boolean result)
     {                
         System.out.println(":> Boolean  " + InputBool + " Changed to : " + result);                                     
     }
     
+public static String MySQLPassword(String plainText)
+{
+    try{
+    byte[] utf8 = plainText.getBytes("UTF-8");
+    byte[] test = Digest.sha(Digest.sha(utf8));
+    return "*" + bytesToHex(test).toUpperCase();}
+    catch(Exception e)
+    {             
+        System.out.println(":> ENCRYPTION Error:>");                                     
+        return "Error";
+    }
+}
+
+public static String bytesToHex(byte[] bytes) {
+    char[] hexChars = new char[bytes.length * 2];
+    for ( int j = 0; j < bytes.length; j++ ) {
+        int v = bytes[j] & 0xFF;
+        hexChars[j * 2] = hexArray[v >>> 4];
+        hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+    }
+    return new String(hexChars);
+}
      
 
     

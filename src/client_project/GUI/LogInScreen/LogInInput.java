@@ -70,12 +70,12 @@ public final class LogInInput extends ApplicationStateManager implements ActionL
         LogBttn = new javax.swing.JButton("Log In");
         LogLbl_U = new javax.swing.JLabel("Enter User Name:");
         LogLbl_P = new javax.swing.JLabel("Enter Password:");
-        Login_UsrNM = new javax.swing.JTextField("Janer", 20);
-        Login_Pass = new javax.swing.JPasswordField("Doe" ,10);    
+        Login_UsrNM = new javax.swing.JTextField("myserverADMIN", 20);
+        Login_Pass = new javax.swing.JPasswordField("ABC123" ,10);    
         IP_INPUT_LBL = new javax.swing.JLabel("Enter IP information");
         Port_Input_LBL = new javax.swing.JLabel("Enter port:");
         Ip_Input = new javax.swing.JTextField("127.0.0.1", 20);
-        Port_Input = new javax.swing.JTextField("8000", 6);
+        Port_Input = new javax.swing.JTextField("8001", 6);
         Error = new javax.swing.JLabel(); Error.setVisible(false);
         CheckSyntax = new UserInputChecker();
         SetUpComponents();

@@ -4,7 +4,14 @@
  * and open the template in the editor.
  */
 package client_project.UserInformation.FileManager;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  *
@@ -49,4 +56,74 @@ public class File_Manager {
         }
     }
     
+     public String readTextFile(String filePath)
+    {
+        if(Readconfig.DoesExist(filePath)) Readconfig.ReadFile(filePath);                               
+        return null;
+    }
+    public String ReadFile(Path InputFile)
+    {        
+        String Content = "";
+        try (InputStream in = Files.newInputStream(InputFile);    
+                BufferedReader reader =      
+                        new BufferedReader(new InputStreamReader(in))) {                
+            String Line = null;    
+            while ((Line = reader.readLine()) != null) { 
+                Content = Content + Line;
+            }
+            return Content;
+        } catch (IOException x) {   
+            return Content;
+        }                                
+    }    
+    public String ReadFile(String InputFile) 
+    {        
+        Path Path_w = FileSystems.getDefault().getPath(InputFile);   
+        String Content = "";
+        try (InputStream in = Files.newInputStream(Path_w);    
+                BufferedReader reader =      
+                        new BufferedReader(new InputStreamReader(in))) {                
+            String Line = null;    
+            while ((Line = reader.readLine()) != null) { 
+                Content = Content + Line;
+            }
+            return Content;
+        } catch (IOException x) {   
+            System.err.println(x);
+            System.out.println("Error, file Not readable: " + x);            
+            Content = "File Not readAble";
+            return Content;
+        }                                
+    }    
+    public Boolean DoesExist(String Filename)
+    {        
+        Path Path_w = FileSystems.getDefault().getPath(Filename);   
+        try (InputStream in = Files.newInputStream(Path_w);    
+                BufferedReader reader =      
+                        new BufferedReader(new InputStreamReader(in))) 
+        {                
+            String line = null;    
+            while ((line = reader.readLine()) != null) {       
+            }
+            return true;
+        } catch (IOException x) { 
+            System.err.println(x);                        
+            return false;
+        }                                
+    }      
+    public Boolean DoesExist(Path Filename)
+    {                
+        try (InputStream in = Files.newInputStream(Filename);    
+                BufferedReader reader =      
+                        new BufferedReader(new InputStreamReader(in))) 
+        {                
+            String line = null;    
+            while ((line = reader.readLine()) != null) {       
+            }
+            return true;
+        } catch (IOException x) { 
+            System.err.println(x);                        
+            return false;
+        }                                
+    }           
 }

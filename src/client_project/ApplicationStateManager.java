@@ -12,6 +12,7 @@
 */
 package client_project;
 import client_project.GUI.LogInScreen.LogInInput;
+import client_project.GUI.MainMenu.DirectoryInterface;
 import client_project.GUI.TopBar;
 import client_project.GUI.MainMenu.ProfileInterface;
 import client_project.UserInformation.FileManager.File_Manager;
@@ -20,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Color;
+import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.SpringLayout;
 import javax.swing.BorderFactory;
@@ -27,7 +29,7 @@ import javax.swing.border.Border;
 
 
 public class ApplicationStateManager extends javax.swing.JPanel{
-
+    public enum ModAccess {ADDUSR, QUERY, NONE};
     public enum LayerSet {MAINMENU, LOGINSCREEN, NONE, TEST};
     public static ActionListener actionPerformed;
     //          _____________PRIVATE FUNCTIONS_________________
@@ -38,9 +40,9 @@ public class ApplicationStateManager extends javax.swing.JPanel{
     // Widget Groups
     TopBar topBar;
     private static LogInInput LogIninput;
-    ProfileInterface DisplayProfile;
-    
-    
+    private static ProfileInterface DisplayProfile;
+    private static DirectoryInterface listFiles;
+        
     // Functional Utilities
     public static LayerSet LayerSelect;       // What layout to put on screen  
     private static String ip_w;        
@@ -65,8 +67,12 @@ public class ApplicationStateManager extends javax.swing.JPanel{
         Panel_w.setPreferredSize(new Dimension(size + size, size));    // Sets size                           
         LayerSelect = Layout;           
         PanelInfo();   
-    }
-     
+    }  
+     public void sendFile(File inputFile, String fileName)
+     {                 
+         Network.sendFiletoServer(inputFile, fileName);
+     }
+   
      public void SetNetworkInfo(String IpInput, String Portinput, String username, String pass)
      {
          ip_w = IpInput;  
@@ -75,22 +81,39 @@ public class ApplicationStateManager extends javax.swing.JPanel{
          Password_w = pass; 
          System.out.println("*** Ip Changed to " + ip_w);                  
      }
+     public void ReacttoModTerminal()
+     {
+         ModAccess ModTerminal = DisplayProfile.getCurrentAction();
+         if (ModTerminal != null){
+            switch(ModTerminal)
+            {
+                case ADDUSR:                 
+                    Network.sendAdminUserAddRequestController(DisplayProfile.getAddUserString());
+                    break;
+                default:             
+                    break;
+            }
+         }
+     }
      public void StartNetExchange()
      {                      
          Network.StartNetworkExchange(ip_w, port, Username_w, Password_w);                                  
-     }
-     
+     }     
      public void setLayerSelect(LayerSet LayerSelected) // This is used to set the layout
      {
             LayerSelect = LayerSelected;                                               
-     }
-     
+     }     
      public void CreateErrorLog(String Error)
      {
          fileManager.Createlog(Error);
          LogIninput.setError(Error);         
      }
-    
+     public void updateProfileDisplay(String userdata[])
+     {
+         DisplayProfile.updateProfileDisplay(userdata);
+         listFiles = new DirectoryInterface(userdata[1]);                 
+         listFiles.setPreferredSize(new Dimension (600,450));
+     }    
     //  This function checks for updates before it applies them when it is needed
     //  other functionality will be contained in a seperate function, this 
     //  function is ONLY used for updating the widgets/screens
@@ -101,6 +124,7 @@ public class ApplicationStateManager extends javax.swing.JPanel{
            case NONE:   // Checks for updates
                if (Network.needUpdate()&& Network.Authenticated()) Network.Update();
                if (Network.errorReceived()) Network.ReacttoError();
+               if (DisplayProfile.checkActionPerformed() && DisplayProfile != null)ReacttoModTerminal();
                break;
                 
            case LOGINSCREEN:  // Log in Screen
@@ -109,6 +133,8 @@ public class ApplicationStateManager extends javax.swing.JPanel{
                con.removeAll();                // Remove Everything                
                SetConstraints(LayerSet.LOGINSCREEN);  // Add constraints 
                ContainerRefresh();
+               Network.closeCon();
+               topBar.setLogOutButtonVisible(false);
                con.add(topBar);
                con.add(LogIninput);
                ContainerRefresh();
@@ -120,21 +146,19 @@ public class ApplicationStateManager extends javax.swing.JPanel{
                con.removeAll();                // Remove Everything  
                SetConstraints(LayerSelect);                              
                ContainerRefresh();
-               con.add(topBar); 
-               con.add(DisplayProfile);                              
+               topBar.setLogOutButtonVisible(true);               
+               con.add(topBar);                               
+               con.add(listFiles);
+               con.add(DisplayProfile);  
                ContainerRefresh();
                LayerSelect = LayerSet.NONE;
-               break;
-              
-               
+               break;                              
            case TEST:               
                break;
            
-           default:               
-                       
+           default:                                      
                break;       
-       }
-        
+       }        
     }
     void SetConstraints(LayerSet ConstraintSelect)
     {
@@ -149,8 +173,7 @@ public class ApplicationStateManager extends javax.swing.JPanel{
                             , SpringLayout.WEST, con);
                 MainWinlayout.putConstraint
                             (SpringLayout.SOUTH, LogIninput, LogIninputy 
-                                    , SpringLayout.SOUTH, con);   
-                
+                                    , SpringLayout.SOUTH, con);                   
                 // ################# SYSTEM FUNCTIONS ################                                                                 
                 MainWinlayout.putConstraint                
                     (SpringLayout.EAST, topBar, 0
@@ -158,8 +181,7 @@ public class ApplicationStateManager extends javax.swing.JPanel{
                 MainWinlayout.putConstraint
                             (SpringLayout.NORTH, topBar, 0 
                                     , SpringLayout.NORTH, con);                                             
-                break;
-                
+                break;                
             case MAINMENU:                                                                                                    
 
                 MainWinlayout.putConstraint                
@@ -168,14 +190,18 @@ public class ApplicationStateManager extends javax.swing.JPanel{
                 MainWinlayout.putConstraint
                             (SpringLayout.NORTH, topBar, 0 
                                     , SpringLayout.NORTH, con);  
-                                               
-              MainWinlayout.putConstraint                
+                MainWinlayout.putConstraint                
+                    (SpringLayout.NORTH, listFiles, 120
+                            , SpringLayout.NORTH, con);
+                MainWinlayout.putConstraint                
+                    (SpringLayout.WEST, listFiles, 645
+                            , SpringLayout.WEST, con);   
+                MainWinlayout.putConstraint                
                     (SpringLayout.NORTH, DisplayProfile, 100
                             , SpringLayout.NORTH, con);
-
                 MainWinlayout.putConstraint                
                     (SpringLayout.WEST, DisplayProfile, 10
-                            , SpringLayout.WEST, con);        
+                            , SpringLayout.WEST, con);                                                                    
                 break;        
         }
     }
@@ -196,9 +222,8 @@ public class ApplicationStateManager extends javax.swing.JPanel{
         LogIninput          = new LogInInput();
         Network             = new UserController();
         fileManager         = new File_Manager();
-        fileManager.init();
-        Panel_w.setVisible(true);
-        
+        fileManager.init();        
+        Panel_w.setVisible(true);        
         // WIDGET Sizes
         // SYSTEM WIDGETS
         topBar.setPreferredSize(new Dimension (300,100));        
@@ -206,11 +231,12 @@ public class ApplicationStateManager extends javax.swing.JPanel{
         LogIninput.setPreferredSize(new Dimension(1000,700));       
         // Menu                                
         DisplayProfile.setPreferredSize(new Dimension(1280,800));
+        // List Directories
+
     }    
     void ContainerRefresh()
     {                     
               con.setVisible(false);          // Refresh Screen        
               con.setVisible(true);           // Refresh Screen      
-    }
-    
+    }    
 }

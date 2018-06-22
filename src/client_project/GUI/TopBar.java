@@ -67,6 +67,10 @@ public final class TopBar extends ApplicationStateManager implements ActionListe
         LogOutBttn.setPreferredSize(new Dimension(100, 100));
         ResetButton.setPreferredSize(new Dimension(100, 100)); 
     }  
+    public void setLogOutButtonVisible(boolean inputBoolean)
+    {
+        LogOutBttn.setVisible(inputBoolean);
+    }
 
     @Override
     public void actionPerformed(ActionEvent e)  {

@@ -3,125 +3,73 @@ package client_project.GUI.MainMenu;
 
 import client_project.ApplicationStateManager;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 
-public class ProfileInterface extends ApplicationStateManager implements ActionListener  {
-    
-    // Private Variables               
-    private javax.swing.BorderFactory Borderfactory ;
-    private javax.swing.border.Border Border;
-    private  java.awt.Color color;
-    
-    // JPANELS        
-    private javax.swing.JPanel ProfileUpdate;
-    private javax.swing.JPanel PanelRow1;       
-    private javax.swing.JPanel PanelRow2;    
-    private javax.swing.JPanel PanelRow3;    
-    private javax.swing.JPanel PanelRow4;        
-    private javax.swing.JPanel PanelRow5;       
-    private javax.swing.JPanel PanelRow6;            
-    
-    // Layouts
-    javax.swing.SpringLayout ProfileUpdateLayout = new javax.swing.SpringLayout();     
-    javax.swing.SpringLayout MainWinlayout = new javax.swing.SpringLayout();          
-    javax.swing.SpringLayout LayoutRow1 = new javax.swing.SpringLayout();   
-    javax.swing.SpringLayout LayoutRow2 = new javax.swing.SpringLayout();        
-    javax.swing.SpringLayout LayoutRow3 = new javax.swing.SpringLayout();
-    javax.swing.SpringLayout LayoutRow4 = new javax.swing.SpringLayout();
-    javax.swing.SpringLayout LayoutRow5 = new javax.swing.SpringLayout();
-    javax.swing.SpringLayout LayoutRow6 = new javax.swing.SpringLayout();
-
-    // Labels
-    private javax.swing.JLabel ProfileName;    
-    private javax.swing.JLabel UserName;       
-    private javax.swing.JLabel FirstName;    
-    private javax.swing.JLabel LastName;       
-    private javax.swing.JLabel StaffID;    
-    private javax.swing.JLabel UpdateLABEL;      
-    
-    // User Information        
-    private javax.swing.JLabel ProfileName_Input;    
-    private javax.swing.JLabel UserName_Input;       
-    private javax.swing.JLabel FirstName_Input;    
-    private javax.swing.JLabel LastName_Input;       
-    private javax.swing.JLabel StaffID_Input;    
-    private javax.swing.JLabel UpdateLABEL_Input;     
-        
-    // Update Labels
-    private javax.swing.JLabel UpdateProfileName;          
-    private javax.swing.JLabel UpdateLastName;  
-    private javax.swing.JLabel UpdateFirstName;
-    
-    // Update Text Fields
-    private javax.swing.JTextField UpdateProfileNameINPUT;
-    private javax.swing.JTextField UpdateFirstNameINPUT;        
-    private javax.swing.JTextField UpdateLastNameINPUT;
-    
-        
-    // Update Button Fields
-    private javax.swing.JButton RequestUpdate;
-    
-    
+public class ProfileInterface extends ApplicationStateManager {          
     public ProfileInterface()
     {
         InitComponents();        
     }
+    public void updateProfileDisplay(String[] newUsername)
+    {
+        ProfileName_Input.setText(newUsername[0]);
+        UserName_Input.setText(newUsername[1]);
+        FirstName_Input.setText(newUsername[2]);
+        LastName_Input.setText(newUsername[3]);
+        StaffID_Input.setText(newUsername[4]);
+        UpdateLABEL_Input.setText(newUsername[5]);
+        if (newUsername[0].equals("ADMIN"))userControls.setModTollsVisible(true);
+        else{userControls.setModTollsVisible(false);}
+    }
+    
+    public void updateDirectory()
+    {                
+    }
+    
         
     @SuppressWarnings("unchecked")
     void InitComponents() 
     {                                        
         Border = Borderfactory.createLineBorder(color.BLACK, 1);
-        ProfileUpdate = new javax.swing.JPanel();        
         PanelRow1 = new javax.swing.JPanel();
         PanelRow2 = new javax.swing.JPanel();        
         PanelRow3 = new javax.swing.JPanel();
         PanelRow4 = new javax.swing.JPanel();       
         PanelRow5 = new javax.swing.JPanel();
-        PanelRow6 = new javax.swing.JPanel(); 
-        
-        // Profile Update Widgets                
-        UpdateProfileName = new javax.swing.JLabel("Update Profile Name:"); 
-        UpdateProfileNameINPUT = new javax.swing.JTextField(12);
-                
-        UpdateFirstName= new javax.swing.JLabel("Update First Name:"); 
-        UpdateFirstNameINPUT = new javax.swing.JTextField(12);
-        
-        UpdateLastName = new javax.swing.JLabel("Update Last Name:"); 
-        UpdateLastNameINPUT = new javax.swing.JTextField(12);    
-        
-        RequestUpdate = new javax.swing.JButton("Request Update"); 
-        
+        PanelRow6 = new javax.swing.JPanel();             
+        userControls = new UpdateProfile();      
         // Profile infomation Widgets
-        ProfileName = new javax.swing.JLabel("Profile:"); 
-        ProfileName_Input = new javax.swing.JLabel("Example_profile");
-        
-        UserName = new javax.swing.JLabel("Username"); 
+        ProfileName = new javax.swing.JLabel("PROFILE:"); 
+        ProfileName_Input = new javax.swing.JLabel("Example_profile");        
+        UserName = new javax.swing.JLabel("USERNAME:"); 
         UserName_Input = new javax.swing.JLabel("ExampleLogInName");                
-
-        FirstName = new javax.swing.JLabel("$FIRST_NAME");
-        FirstName_Input = new javax.swing.JLabel("Dane");
-        
-        LastName = new javax.swing.JLabel("LAST_NAME");         
-        LastName_Input = new javax.swing.JLabel("Joe");
-        
-        StaffID = new javax.swing.JLabel("STAFF_ID");
-        StaffID_Input = new javax.swing.JLabel("32");
-        
-        UpdateLABEL = new javax.swing.JLabel("Last Update:");                                       
-        UpdateLABEL_Input = new javax.swing.JLabel("Example_Date");  
-        
-        
-        
+        FirstName = new javax.swing.JLabel("FIRST NAME:");
+        FirstName_Input = new javax.swing.JLabel("Dane");        
+        LastName = new javax.swing.JLabel("LAST NAME");         
+        LastName_Input = new javax.swing.JLabel("Joe");        
+        StaffID = new javax.swing.JLabel("STAFF ID");
+        StaffID_Input = new javax.swing.JLabel("32");        
+        UpdateLABEL = new javax.swing.JLabel("Last Login:");                                       
+        UpdateLABEL_Input = new javax.swing.JLabel("Example_Date");                          
         setComponents();
         this.setLayout(MainWinlayout);
+        setUpdateScreen();
         this.setBorder(Border);                        
         this.setVisible(true);
     }  
     
-     
-    
+    void setUpdateScreen()
+    {
+        userControls.setPreferredSize(new Dimension(1000,250));
+        this.add(userControls);
+        MainWinlayout.putConstraint          // Profile Input
+                    (javax.swing.SpringLayout.WEST, userControls, 
+                            100 ,javax.swing.SpringLayout.WEST, this);
+               
+        MainWinlayout.putConstraint           // Profile Input       
+                    (javax.swing.SpringLayout.NORTH,userControls, 
+                           500 ,javax.swing.SpringLayout.NORTH, this);        
+    }             
     void setComponents()
     {
         setRow(PanelRow1, LayoutRow1, ProfileName, ProfileName_Input, 10);
@@ -130,95 +78,23 @@ public class ProfileInterface extends ApplicationStateManager implements ActionL
         setRow(PanelRow4, LayoutRow4, LastName, LastName_Input, 260);
         setRow(PanelRow5, LayoutRow5, StaffID, StaffID_Input, 340);
         setRow(PanelRow6, LayoutRow6, UpdateLABEL, UpdateLABEL_Input, 420);               
-        setUpdateScreen();
-
-    }   
-        
-    void setUpdateScreen()
-    {
-        this.add(ProfileUpdate);
-        ProfileUpdate.setBorder(Border);
-        ProfileUpdate.setLayout(ProfileUpdateLayout);
-        ProfileUpdate.add(UpdateProfileName);                
-        ProfileUpdate.add(UpdateProfileNameINPUT);                
-        ProfileUpdate.add(UpdateFirstName);
-        ProfileUpdate.add(UpdateFirstNameINPUT);
-        ProfileUpdate.add(UpdateLastName);
-        ProfileUpdate.add(UpdateLastNameINPUT);                        
-        ProfileUpdate.add(RequestUpdate); 
-        
-        ProfileUpdate.setPreferredSize(new Dimension(1250,300));
-        
-        MainWinlayout.putConstraint           // Profile Input
-                    (javax.swing.SpringLayout.WEST, ProfileUpdate, 
-                           10 ,javax.swing.SpringLayout.WEST, this);
-       
-        
-        MainWinlayout.putConstraint           // Profile Input       
-                    (javax.swing.SpringLayout.SOUTH,ProfileUpdate, 
-                           -20 ,javax.swing.SpringLayout.SOUTH, this);
-        
-        ProfileUpdateLayout.putConstraint     // Profile Input
-                    (javax.swing.SpringLayout.WEST,UpdateProfileName , 
-                           50 ,javax.swing.SpringLayout.WEST, ProfileUpdate);
-               
-        ProfileUpdateLayout.putConstraint     // Profile Input       
-                    (javax.swing.SpringLayout.NORTH,UpdateProfileName, 
-                           25 ,javax.swing.SpringLayout.NORTH, ProfileUpdate);
-        
-        ProfileUpdateLayout.putConstraint     // Profile Input
-                    (javax.swing.SpringLayout.WEST,UpdateProfileNameINPUT , 
-                           140 ,javax.swing.SpringLayout.WEST, UpdateProfileName);
-               
-        ProfileUpdateLayout.putConstraint     // Profile Input       
-                    (javax.swing.SpringLayout.SOUTH,UpdateProfileNameINPUT, 
-                           0 ,javax.swing.SpringLayout.SOUTH, UpdateProfileName);  
-        
-        
-        ProfileUpdateLayout.putConstraint     // FIRST NAME Input       
-                    (javax.swing.SpringLayout.WEST,UpdateFirstName, 
-                           350 ,javax.swing.SpringLayout.WEST, UpdateProfileName);  
-        
-        ProfileUpdateLayout.putConstraint     // FIRST NAME  Input       
-                    (javax.swing.SpringLayout.NORTH,UpdateFirstName, 
-                           0 ,javax.swing.SpringLayout.NORTH, UpdateProfileName);  
-        
-        ProfileUpdateLayout.putConstraint     // FIRST NAME  Input       
-                    (javax.swing.SpringLayout.SOUTH,UpdateFirstNameINPUT, 
-                           0 ,javax.swing.SpringLayout.SOUTH, UpdateFirstName);  
-        
-        ProfileUpdateLayout.putConstraint     // FIRST NAME  Input       
-                    (javax.swing.SpringLayout.WEST,UpdateFirstNameINPUT, 
-                           150 ,javax.swing.SpringLayout.WEST, UpdateFirstName);     
-        
-                
-        ProfileUpdateLayout.putConstraint     // // LAST NAME Input       
-                    (javax.swing.SpringLayout.WEST,UpdateLastName, 
-                           0 ,javax.swing.SpringLayout.WEST, UpdateProfileName);  
-        
-        ProfileUpdateLayout.putConstraint     // LAST NAME Input       
-                    (javax.swing.SpringLayout.NORTH,UpdateLastName, 
-                           100 ,javax.swing.SpringLayout.NORTH, UpdateProfileName);  
-        
-        ProfileUpdateLayout.putConstraint     // LAST NAME Input       
-                    (javax.swing.SpringLayout.SOUTH,UpdateLastNameINPUT, 
-                           0 ,javax.swing.SpringLayout.SOUTH, UpdateLastName);  
-        
-        ProfileUpdateLayout.putConstraint     // LAST NAME Input       
-                    (javax.swing.SpringLayout.WEST,UpdateLastNameINPUT, 
-                           140 ,javax.swing.SpringLayout.WEST, UpdateLastName);  
-        
-                
-        ProfileUpdateLayout.putConstraint     // UPDATE BUTTON       
-                    (javax.swing.SpringLayout.SOUTH,RequestUpdate, 
-                           0 ,javax.swing.SpringLayout.SOUTH, UpdateLastName);  
-        
-        ProfileUpdateLayout.putConstraint     // UPDATE BUTTON     
-                    (javax.swing.SpringLayout.WEST,RequestUpdate, 
-                           415 ,javax.swing.SpringLayout.WEST, UpdateLastName); 
-    }
+    }  
     
+    public boolean checkActionPerformed()        
+    {             
+        return userControls.checkActionPerformed();        
+    }
 
+     
+    public ModAccess getCurrentAction()        
+    {     
+         return userControls.getCurrentAction();        
+    }    
+              
+    public String getAddUserString()       
+    {    
+        return userControls.getAddUserString();     
+    }       
     // 
     // SetRow Fncitonality
     // Takes the Panel for a specific Row, adds it's components
@@ -263,9 +139,40 @@ public class ProfileInterface extends ApplicationStateManager implements ActionL
                             15 ,javax.swing.SpringLayout.NORTH, InputPanel); 
     }                 
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-    
-        
-    }
+
+    private static UpdateProfile userControls;
+        // Private Variables               
+    private javax.swing.BorderFactory Borderfactory ;
+    private javax.swing.border.Border Border;
+    private  java.awt.Color color;    
+    // JPANELS        
+    private javax.swing.JPanel PanelRow1;       
+    private javax.swing.JPanel PanelRow2;    
+    private javax.swing.JPanel PanelRow3;    
+    private javax.swing.JPanel PanelRow4;        
+    private javax.swing.JPanel PanelRow5;       
+    private javax.swing.JPanel PanelRow6;                
+    // Layouts
+    javax.swing.SpringLayout MainWinlayout = new javax.swing.SpringLayout();          
+    javax.swing.SpringLayout LayoutRow1 = new javax.swing.SpringLayout();   
+    javax.swing.SpringLayout LayoutRow2 = new javax.swing.SpringLayout();        
+    javax.swing.SpringLayout LayoutRow3 = new javax.swing.SpringLayout();
+    javax.swing.SpringLayout LayoutRow4 = new javax.swing.SpringLayout();
+    javax.swing.SpringLayout LayoutRow5 = new javax.swing.SpringLayout();
+    javax.swing.SpringLayout LayoutRow6 = new javax.swing.SpringLayout();
+    // Labels
+    private javax.swing.JLabel ProfileName;    
+    private javax.swing.JLabel UserName;       
+    private javax.swing.JLabel FirstName;    
+    private javax.swing.JLabel LastName;       
+    private javax.swing.JLabel StaffID;    
+    private javax.swing.JLabel UpdateLABEL;          
+    // User Information        
+    private javax.swing.JLabel ProfileName_Input;    
+    private javax.swing.JLabel UserName_Input;       
+    private javax.swing.JLabel FirstName_Input;    
+    private javax.swing.JLabel LastName_Input;       
+    private javax.swing.JLabel StaffID_Input;    
+    private javax.swing.JLabel UpdateLABEL_Input;         
+
 }

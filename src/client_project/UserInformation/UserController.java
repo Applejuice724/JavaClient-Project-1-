@@ -7,6 +7,8 @@ package client_project.UserInformation;
 
 import client_project.ApplicationStateManager;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 
@@ -19,7 +21,7 @@ public class UserController extends ApplicationStateManager {
     private Socket UserSocket;
     private String IpAddress;
     private int PortNumber;
-    NetControl networkThread;
+    private NetControl networkThread;
     ErrorHandle ReportError;
     PrintWriter out;
     BufferedReader in;
@@ -40,26 +42,44 @@ public class UserController extends ApplicationStateManager {
         IpAddress = "127.0.0.1";
         PortNumber = 68;
     }
+
      
     public void StartNetworkExchange(String InputIP, int InputPort, String inputUserName, String inputPass)
-    {                                
-        if (networkThread == null ) {                    
-            System.out.println("*** Starting Connection");    
-            networkThread = new NetControl();
-            networkThread.setParameters(InputIP, InputPort, inputUserName, inputPass);                
-            networkThread.start();
-        }
-        else
-        {
-            if(networkThread.IsConnected()) { // ToDo, check if Ip/port has changed
-                networkThread.RetryAuthentication(inputUserName, inputPass);
-            }
-        }
+    {                                                              
+        System.out.println("*** Starting Connection");  
+        closeCon();      
+        networkThread.setParameters(InputIP, InputPort, inputUserName, inputPass);                               
+        networkThread.start();       
     }  
     public void Update()
     {
-        super.setLayerSelect(LayerSelect.MAINMENU);
+        switch (networkThread.getupdateDefinition())    
+        {
+            case USERINFORMATIONUPDATE:
+                super.updateProfileDisplay(networkThread.getUserData());
+                super.setLayerSelect(LayerSelect.MAINMENU);               
+                break;   
+        }                
         networkThread.ToggleFlag("UPDATE");
+        networkThread.changeUpdateDefine(NetControl.updateDefinition.NONE);
+    }
+    public void sendFiletoServer(File inputFile, String fileName)
+    {
+        try {
+            networkThread.sendFile(inputFile, fileName);                  
+        } catch (IOException ex) {}          
+    }
+      
+    public void closeCon()
+    {
+        if (networkThread != null)networkThread.closeCon();                
+        if (networkThread != null)networkThread.stopEverything();
+        networkThread = null;
+        networkThread = new NetControl();
+    }
+    public void sendAdminUserAddRequestController(String SQLStatement)
+    {
+        networkThread.sendAdminUserAddRequest(SQLStatement);
     }
     public boolean needUpdate()
     {        

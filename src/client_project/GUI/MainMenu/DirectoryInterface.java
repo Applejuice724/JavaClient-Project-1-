@@ -43,7 +43,8 @@ public class DirectoryInterface extends ApplicationStateManager implements Actio
     {        
         initComponents(inputUser);
     }                        
-    public void initComponents(String user) {  
+    public void initComponents(String user) { 
+        if (!manage.DoesExist(clientFolder)) manage.createFolder(clientFolder);                
         clientFolder = clientFolder+"\\"+user;
         if (!manage.DoesExist(clientFolder)) manage.createFolder(clientFolder);        
         fileSystem = new DirectoryRestrictedFileSystemView(new File(clientFolder)); 
@@ -180,6 +181,7 @@ public class DirectoryInterface extends ApplicationStateManager implements Actio
         {
             try
             {        
+                System.out.println("Button pressed!");
                 File Sendfile = jFileChooser1.getSelectedFile();
                 super.sendFile(Sendfile, Sendfile.getName());        
             }catch(Exception ett){}

@@ -76,6 +76,7 @@ public class NetControl extends Thread  {
         UPDATE = false;    
         PROCESS = false;
         SETTINGCONNECTION = true;
+        
     }
     
     public void setParameters(String ip, int port, String inputUsername, String inputPassword) 
@@ -85,6 +86,14 @@ public class NetControl extends Thread  {
         port_w = port;
         Ip_w = ip;    
         fromServer = new String();
+        try{                    
+                connectToServer = new Socket(Ip_w, port_w);                                    
+                // Create data input and output streams                        
+                FromServer = new BufferedReader
+                        (new InputStreamReader(connectToServer.getInputStream()));                
+                osToServer = new PrintWriter(connectToServer.getOutputStream(), true);  
+                 setUpConnection();
+        }catch(Exception e){}
     }
     public void stopEverything()
     {
@@ -101,42 +110,7 @@ public class NetControl extends Thread  {
     
     public void run() 
     {                   
-        System.out.println("*** Username: " + username);        
-        System.out.println("*** Password: " + password);
-        System.out.println("*** IP: " + Ip_w);
-        System.out.println("*** Port: " + port_w);    
-        
-        while (running){
-            CONNECTED = true;                                  
-            if (Ip_w != null || port_w != -1){
-            try {         
-                connectToServer = new Socket(Ip_w, port_w);                                    
-                // Create data input and output streams            
-                FromServer = new BufferedReader
-                        (new InputStreamReader(connectToServer.getInputStream()));
-                osToServer = new PrintWriter(connectToServer.getOutputStream(), true);                         	  
-                while (!connectToServer.equals(connectToServer.isClosed()))                    
-                {         
-                    while(SETTINGCONNECTION)
-                    {                      
-                        setUpConnection();  // This is the credentual Check Stage=
-                    }                                           
-                    while (AUTHENTICATED) // If creds Statisfied, run network Communicaitons
-                    {                                                               
-                    }                                                                        
-                }  
-            } 
-            catch (IOException ex) 
-            {        
-                Logger.getLogger(NetControl.class.getName()).log(Level.SEVERE, null, ex);                       
-                System.out.println("*** Network Error: No server Found");      
-            }                           
-          }                    
-          else 
-          {
-              System.out.println("*** Network Error: There is no Port/Ip bound");
-          }
-        }
+       
     }
     public void sendFile(File inputPath, String fileName) throws FileNotFoundException, IOException
     {    
@@ -148,18 +122,23 @@ public class NetControl extends Thread  {
                 if (FromServer.readLine().replaceAll("//s", "") == ACK);
                 sendMessage(fileName);  
                 if (FromServer.readLine().replaceAll("//s", "") == ACK);   
-                // *****************        	 
+                // *****************    
+                System.out.println("Sending File IN BYTES "+inputPath);                    
                 OutputStream o = connectToServer.getOutputStream();	  
                 ObjectOutputStream s = new ObjectOutputStream(o); 
                 byte[] content = Files.readAllBytes(inputPath.toPath());  
-                s.writeObject(content);
-                FromServer = new BufferedReader
-                            (new InputStreamReader(connectToServer.getInputStream()));        
-                osToServer = new PrintWriter(connectToServer.getOutputStream(), true);  
-                if (FromServer.readLine().replaceAll("//s", "") == ACK) System.out.print("Majoer success!");
-                ToggleFlag("PROCESS");
+                s.writeObject(content);               
             }   
-        }catch(Exception e){System.out.println("Send File Error!: "+e);}
+            else{System.out.println("Could not send file, too many processes");}
+        }catch(Exception e){System.out.println("Send File Error!: "+e);}finally
+        { 
+            FromServer = new BufferedReader
+                            (new InputStreamReader(connectToServer.getInputStream()));                   
+            osToServer = new PrintWriter(connectToServer.getOutputStream(), true);              
+            if (FromServer.readLine().replaceAll("//s", "").equals(ACK)) System.out.print("*** End of file Transfer");  
+            else{System.out.println("Undertermined Outcome from server Response: " + FromServer.readLine().replaceAll("//s", ""));}
+            ToggleFlag("PROCESS");            
+        }
     }  
     public void sendAdminUserAddRequest(String SQLMessage)
     {
@@ -180,7 +159,7 @@ public class NetControl extends Thread  {
                 // Put in Confirmaiton message here                                                
                 ToggleFlag("PROCESS");
             }       
-        }catch(Exception e){System.out.println("Send File Error!: "+e);}        
+        }catch(Exception e){System.out.println("Send File Error!: "+e);} 
     }
 
     private void setUpConnection()
@@ -196,13 +175,16 @@ public class NetControl extends Thread  {
                     sendMessage("NETWORKSTART"); // Send Start Message                   
                     fromServer = FromServer.readLine().replaceAll("//s", "");                   
                     if (fromServer.equals(ACK)) SendCredentials(); // If message is sent back, send credentuals                        
-                    Timeout++;
+                    Timeout++;                                    
+                    PROCESS = false;
                 }catch(IOException e){}            
             }
     }
     private void SendCredentials() 
     {                 
         System.out.println("*** Network Connection: Established, Authenticating...");
+                            ToggleFlag("PROCESS");
+
          try{     
              sendMessage(username); 
              fromServer = FromServer.readLine(); 
@@ -215,6 +197,7 @@ public class NetControl extends Thread  {
                  {
                      System.out.println("*** Authentation compelte..."); 
                      changeUpdateDefine(updateDefinition.USERINFORMATIONUPDATE);
+                     PROCESS = false;
                      ToggleFlag("AUTHENTICATED");
                      ToggleFlag("UPDATE");   
                      ToggleFlag("PROCESS");
@@ -224,7 +207,7 @@ public class NetControl extends Thread  {
                      running = false;
                      SETTINGCONNECTION = false;
                      connectToServer.shutdownOutput();
-                     ToggleFlag("PROCESS");
+                     PROCESS = false;
                      return;
 
                  }
@@ -235,7 +218,10 @@ public class NetControl extends Thread  {
                  SETTINGCONNECTION = false;
                  return;
              }
-         }catch(IOException e){}        
+         }catch(IOException e){} finally
+         {                                                
+             PROCESS = false;
+         }       
     }                
     private void logError(String ServerMessage)
     {      
@@ -318,9 +304,9 @@ public class NetControl extends Thread  {
                 PrintToggledFlag(InputBool, PROCESS);
                 break;
             default:
-                System.out.println(" No such Flag Found ");
-                                                                                     
-        }                                                     
+                System.out.println(" No such Flag Found ");                                                                                     
+        }                                                                                       
+        PROCESS = false;
     }    
     //              ~~~~~~~~~~~~~~~~~Log functions~~~~~~~~~~~~~~~~    
      private void sendMessage(String Message)
